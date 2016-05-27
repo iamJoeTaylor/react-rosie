@@ -10,7 +10,7 @@
     "build:es6": "rollup -c --environment ES",
     "build:umd": "rollup -c --environment DEPS",
     "build": "npm run build:cjs && npm run build:es6 && npm run build:umd",
-    "prepublish": "rm -rf dist && npm run build:es6 && npm run build:umd"
+    "prepublish": "rm -rf dist && npm run build"
   },
   "files": [
     "src/*",
