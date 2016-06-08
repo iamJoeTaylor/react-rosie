@@ -2,6 +2,13 @@ const Factory = require('rosie').Factory;
 
 const randomString = () => Math.random().toString(36).slice(-8);
 const weightedRand = spec => {
+  if (typeof spec === 'number') {
+    const _spec = {};
+    for (let i = 0; i < spec; i++) {
+      _spec[i] = 1/spec;
+    }
+    spec = _spec
+  }
   let i;
   let sum = 0
   const r = Math.random();
@@ -12,7 +19,11 @@ const weightedRand = spec => {
 }
 
 const generators = {
+  any: () => generators[ Object.keys(generators)[weightedRand(Object.keys(generators).length)] ](),
+  array: () => [],
   bool: () => Boolean(Math.floor(Math.random() * 9) % 2),
+  func: () => () => () => {},
+  node: () => generators[ ['array', 'number', 'string'][weightedRand({ 0: .3, 1: .3, 2: .4 })] ](),
   number: () => Math.floor(Math.random() * 1000),
   object: () => ({ test: 'props'}),
   string: randomString,
@@ -43,6 +54,15 @@ const curiedPropTypes = {
     return returnArray;
   }),
   instanceOf: Constructor => () => new Constructor(),
+  objectOf: type => () => new Factory().props({ test: type }).build({}, { _test: true }),
+  oneOf: enumValues => () => {
+    const specWeight = {};
+    enumValues.forEach(value => specWeight[value] = 1/enumValues.length);
+    return weightedRand(specWeight);
+  },
+  oneOfType: types => () => {
+    return new Factory().props({ value: types[weightedRand(types.length)] }).build({}, { _value: true }).value;
+  },
   shape: shape => () => new Factory().props(shape).build(),
 }
 
