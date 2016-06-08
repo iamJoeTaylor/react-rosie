@@ -22,11 +22,21 @@ export default new Factory()
 
 ## Supported Generators
 
-- Strings
-- Numbers
-- Booleans
+- Any
+- Array
+- Bool
+- Func
+- Node
+- Number
+- Object
+- String
 
-More to come soon.
+- ArrayOf
+- InstanceOf
+- ObjectOf
+- OneOf
+- OneOfType
+- Shape
 
 ## API
 

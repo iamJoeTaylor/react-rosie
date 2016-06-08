@@ -5,6 +5,50 @@ import React from 'react';
 
 Factory.setUpReact(React);
 
+describe('kitchen sink', () => {
+  let factory;
+  beforeEach(() => {
+    factory = new Factory()
+      .props({
+        any: React.PropTypes.any.isRequired,
+        array: React.PropTypes.array.isRequired,
+        bool: React.PropTypes.bool.isRequired,
+        func: React.PropTypes.func.isRequired,
+        node: React.PropTypes.node.isRequired,
+        number: React.PropTypes.number.isRequired,
+        object: React.PropTypes.object.isRequired,
+        string: React.PropTypes.string.isRequired,
+
+        arrayOf: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
+        instanceOf: React.PropTypes.instanceOf(Factory).isRequired,
+        oneOf: React.PropTypes.oneOf(['foo', 'bar', 'baz']).isRequired,
+        shape: React.PropTypes.shape({
+          array: React.PropTypes.array.isRequired,
+          bool: React.PropTypes.bool.isRequired,
+          func: React.PropTypes.func.isRequired,
+          node: React.PropTypes.node.isRequired,
+          number: React.PropTypes.number.isRequired,
+          object: React.PropTypes.object.isRequired,
+          string: React.PropTypes.string.isRequired,
+
+          arrayOf: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
+          instanceOf: React.PropTypes.instanceOf(Factory).isRequired,
+          oneOf: React.PropTypes.oneOf(['foo', 'bar', 'baz']).isRequired,
+        }).isRequired,
+        oneOfType: React.PropTypes.oneOfType([
+          React.PropTypes.string,
+          React.PropTypes.number,
+          React.PropTypes.object,
+        ]).isRequired,
+        objectOf: React.PropTypes.objectOf( React.PropTypes.arrayOf( React.PropTypes.number ) ).isRequired,
+      });
+  });
+
+  it('is valid', () => {
+    expect(factory.build.bind(factory)).to.not.throw()
+  });
+});
+
 describe('standard React.PropTypes', () => {
   it('switched on isRequired', () => {
     const factory = new Factory()
