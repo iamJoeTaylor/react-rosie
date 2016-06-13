@@ -70,13 +70,35 @@ unless explicitly included by passing the option of `_PROPNAME: true`.
 Options use a nested format that can be as deep or as shallow as you'd like. Options can be
 used to control things like likely-hood of array length.
 
-##### `arrayOf`
-
+##### `array`
 - weight - <Object> key of length, value of decimal percentage of likely-hood
 
   EXAMPLE: `{ 0: .3, 1: .4, 2: .1, 3: .1, 4: .1 }`
 
-More to come soon.
+##### `func`
+- stub - <Function> function you'd like to have ran
+
+##### `number`
+- min - <Integer> Min (inclusive) of the random value range
+- max - <Integer> Max (exclusive) of the random value range
+
+##### `string`
+- stringLength - <Integer> length of string
+
+##### `arrayOf`
+- weight - <Object> key of length, value of decimal percentage of likely-hood
+
+  EXAMPLE: `{ 0: .3, 1: .4, 2: .1, 3: .1, 4: .1 }`
+
+##### `instanceOf`
+- args - <Array> Arguments passed to the constructor
+
+##### `objectOf`
+- keys - <Array <Strings>> Keys of the object
+- opts - <Object> Options of the type
+
+##### `shape`
+- * - <Object> another full Options object for the nested shape
 
 ## Example
 

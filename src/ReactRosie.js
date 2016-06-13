@@ -1,6 +1,12 @@
 const Factory = require('rosie').Factory;
 
-const randomString = () => Math.random().toString(36).slice(-8);
+const randomString = (length = 8) => {
+  let random = Math.random().toString(36).slice(2);
+  if (length > random.length) {
+    random = random + randomString(length - random.length);
+  }
+  return random.slice(-length);
+}
 const weightedRand = spec => {
   if (typeof spec === 'number') {
     const _spec = {};
@@ -18,43 +24,82 @@ const weightedRand = spec => {
   }
 }
 
-const generators = {
-  any: () => generators[ Object.keys(generators)[weightedRand(Object.keys(generators).length)] ](),
-  array: () => [],
-  bool: () => Boolean(Math.floor(Math.random() * 9) % 2),
-  func: () => () => () => {},
-  node: () => generators[ ['array', 'number', 'string'][weightedRand({ 0: .3, 1: .3, 2: .4 })] ](),
-  number: () => Math.floor(Math.random() * 1000),
-  object: () => ({ test: 'props'}),
-  string: randomString,
+const generateArrayWithOpts = (opts, generator) => {
+  const returnArray = [];
+  const numberOfItems = weightedRand(opts.weight || {0:0.7, 1:0.2, 2:0.1});
+  for (let i = 0; i < numberOfItems; i++ ) {
+    returnArray.push(generator(i));
+  }
+  return returnArray;
 };
 
 // Abstract the option accepter function out so the curry below is less crazy
-const acceptOptions = cb => (opts = {}) => () => cb(opts);
+const acceptOptions = (optsName, cb) => (opts = {}) => {
+  if (!cb) {
+    cb = optsName;
+    optsName = undefined;
+  }
+  if (optsName) opts = opts[optsName];
+
+  return () => cb(opts);
+};
+
+const generators = {
+  any: () => generators[ Object.keys(generators)[weightedRand(Object.keys(generators).length)] ](),
+  array: acceptOptions('array', (opts = {}) => {
+    return generateArrayWithOpts(opts, () => generators.node()());
+  }),
+  bool: () => Boolean(Math.floor(Math.random() * 9) % 2),
+  func: acceptOptions('func', (opts = {}) => opts.stub || function() {}),
+  node: () => generators[ ['array', 'number', 'string'][weightedRand({ 0: .3, 1: .3, 2: .4 })] ](),
+  number: acceptOptions('number', (opts = {}) => {
+    const min = opts.min || 0;
+    const max = opts.max || 1000;
+    return Math.floor(Math.random() * (max - min)) + min;
+  }),
+  object: () => ({ test: 'props'}),
+  string: acceptOptions('string', (opts = {}) => randomString(opts.stringLength)),
+};
 
 /*
  * These need to define AT LEAST one curried function. This function will be called once
  * on when assigning a React PropType.
  */
 const curiedPropTypes = {
-  arrayOf: child => acceptOptions(opts => {
-    let { arrayOf: arrayOfOpts } = opts;
-    arrayOfOpts = arrayOfOpts || {};
-
-    const returnArray = [];
-    if (child && child.displayName) {
-      const arrayOfName = child.displayName;
-      if (arrayOfName && generators[arrayOfName]) {
-        const numberOfItems = weightedRand(arrayOfOpts.weight || {0:0.7, 1:0.2, 2:0.1});
-        for (let i = 0; i < numberOfItems; i++ ) {
-          returnArray.push(generators[arrayOfName]());
-        }
-      }
+  arrayOf: child => acceptOptions('arrayOf', (opts = {}) => {
+    const childOpts = {};
+    if(child.displayName && opts[child.displayName]) {
+      childOpts[child.displayName] = opts[child.displayName];
     }
-    return returnArray;
+
+    return generateArrayWithOpts(opts, () => {
+      return new Factory()
+        .props({ value: child }, { value: childOpts })
+        .build({}, { _value: true })
+        .value
+    });
   }),
-  instanceOf: Constructor => () => new Constructor(),
-  objectOf: type => () => new Factory().props({ test: type }).build({}, { _test: true }),
+  instanceOf: Constructor => acceptOptions('instanceOf', (opts = {}) => {
+    const args = opts.args || [];
+    return new Constructor(...args);
+  }),
+  objectOf: type => acceptOptions('objectOf', (opts = {}) => {
+    const shape = {};
+    const propsOpts = opts.opts || {};
+    const buildOpts = {};
+    if (opts.keys) {
+      opts.keys.forEach(key => {
+        shape[key] = type;
+        buildOpts[`_${key}`] = true;
+        if (!propsOpts[key]) propsOpts[key] = opts.opts;
+      });
+    } else {
+      shape.test = type;
+      buildOpts._test = true;
+    }
+    return new Factory().props(shape, propsOpts).build({}, buildOpts);
+  }),
+  // objectOf: type => () => new Factory().props({ test: type }).build({}, { _test: true }),
   oneOf: enumValues => () => {
     const specWeight = {};
     enumValues.forEach(value => specWeight[value] = 1/enumValues.length);
@@ -63,7 +108,7 @@ const curiedPropTypes = {
   oneOfType: types => () => {
     return new Factory().props({ value: types[weightedRand(types.length)] }).build({}, { _value: true }).value;
   },
-  shape: shape => () => new Factory().props(shape).build(),
+  shape: shape => acceptOptions((opts = {}) => new Factory().props(shape, opts).build()),
 }
 
 Factory.setUpReact = function (React) {
@@ -152,7 +197,7 @@ Factory.prototype.props = function (propTypes, opts = {}) {
       this.option(`_${prop}`, false);
       this.attr(prop, [`_${prop}`], isIncluded => {
         if (isIncluded) {
-          const returnValue = generators[displayName]();
+          const returnValue = generators[displayName](opts[prop]);
           if (typeof returnValue === 'function') return returnValue();
           return returnValue;
         }
