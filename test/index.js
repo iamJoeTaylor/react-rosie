@@ -5,7 +5,7 @@ import React from 'react';
 
 Factory.setUpReact(React);
 
-describe('kitchen sink', () => {
+describe.only('kitchen sink', () => {
   let factory;
   beforeEach(() => {
     factory = new Factory()
@@ -20,7 +20,7 @@ describe('kitchen sink', () => {
         string: React.PropTypes.string.isRequired,
 
         arrayOf: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
-        instanceOf: React.PropTypes.instanceOf(Factory).isRequired,
+        instanceOf: React.PropTypes.instanceOf(Array).isRequired,
         oneOf: React.PropTypes.oneOf(['foo', 'bar', 'baz']).isRequired,
         shape: React.PropTypes.shape({
           array: React.PropTypes.array.isRequired,
@@ -41,10 +41,57 @@ describe('kitchen sink', () => {
           React.PropTypes.object,
         ]).isRequired,
         objectOf: React.PropTypes.objectOf( React.PropTypes.arrayOf( React.PropTypes.number ) ).isRequired,
+      }, {
+        array: {
+          array: {
+            weight: { 6: 1 }
+          }
+        },
+        number: {
+          number: {
+            min: 1,
+            max: 36
+          }
+        },
+        func: {
+          func: {
+            stub: () => 'im a stub'
+          }
+        },
+        instanceOf: {
+          instanceOf: {
+            args: ['123', 456]
+          }
+        },
+        shape: {
+          arrayOf: {
+            arrayOf: {
+              weight: { 6: 1 },
+              string: {
+                stringLength: 20
+              }
+            }
+          }
+        },
+        objectOf: {
+          objectOf: {
+            keys: ['a', 'b', 'ect'],
+            opts: {
+              arrayOf: {
+                weight: { 6: 1 },
+                number: {
+                  min: 20,
+                  max: 400
+                }
+              }
+            }
+          }
+        }
       });
   });
 
   it('is valid', () => {
+    console.log(factory.build());
     expect(factory.build.bind(factory)).to.not.throw()
   });
 });
