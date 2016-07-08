@@ -30,7 +30,6 @@ export default new Factory()
 - Number
 - Object
 - String
-
 - ArrayOf
 - InstanceOf
 - ObjectOf
@@ -71,7 +70,7 @@ Options use a nested format that can be as deep or as shallow as you'd like. Opt
 used to control things like likely-hood of array length.
 
 ##### `array`
-- weight - <Object> key of length, value of decimal percentage of likely-hood
+- weight - key of length, value of decimal percentage of likely-hood
 
   EXAMPLE: `{ 0: .3, 1: .4, 2: .1, 3: .1, 4: .1 }`
 
@@ -86,7 +85,7 @@ used to control things like likely-hood of array length.
 - stringLength - <Integer> length of string
 
 ##### `arrayOf`
-- weight - <Object> key of length, value of decimal percentage of likely-hood
+- weight - key of length, value of decimal percentage of likely-hood
 
   EXAMPLE: `{ 0: .3, 1: .4, 2: .1, 3: .1, 4: .1 }`
 
@@ -95,10 +94,10 @@ used to control things like likely-hood of array length.
 
 ##### `objectOf`
 - keys - <Array <Strings>> Keys of the object
-- opts - <Object> Options of the type
+- opts - Options of the type
 
 ##### `shape`
-- * - <Object> another full Options object for the nested shape
+- * - another full Options object for the nested shape
 
 ## Example
 
