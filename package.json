@@ -1,6 +1,6 @@
 {
   "name": "react-rosie",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Factory for building React Props, Powered by RosieJS",
   "main": "dist/react-rosie.cjs.js",
   "jsnext:main": "dist/react-rosie.es6.js",
